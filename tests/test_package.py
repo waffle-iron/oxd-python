@@ -1,4 +1,9 @@
-from oxdpython import Client
+import oxdpython
 
-def test_initialization():
-    assert Client
+from nose.tools import assert_equal
+
+def test_metadata():
+    assert_equal(oxdpython.__name__, "oxdpython")
+    assert_equal(oxdpython.__description__, "A Python Client for oxD Server")
+    assert_equal(oxdpython.__version__, "0.0.1")
+    assert_equal(oxdpython.__author__, "Gluu")
