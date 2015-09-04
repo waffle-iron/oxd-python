@@ -1,13 +1,11 @@
 import socket
 
-from mock import patch
-from nose.tools import assert_equal, assert_is_instance
+from nose.tools import assert_equal, assert_is_instance, assert_raises
 
 from oxdpython.messenger import Messenger
 
 
-@patch('socket.socket.connect')
-def test_messenger_constructor(connect_mock):
+def test_messenger_constructor():
     # port assignment
     mes1 = Messenger()
     assert_equal(mes1.port, 8099)
@@ -34,3 +32,8 @@ def test_send():
     msgr = Messenger(8099)
     response = msgr.send({"command": "test"})
     assert 'status' in response.keys()
+
+    # should raise error when oxd server is not running
+    msgr2 = Messenger(4000)  # port 4000 in not oxd hence not running
+    with assert_raises(RuntimeError):
+        msgr2.send({"command": "raise"})
