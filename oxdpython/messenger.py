@@ -1,6 +1,8 @@
 import json
 import socket
 
+from collections import namedtuple
+
 
 class Messenger:
     """A class which takes care of the socket communication with oxD Server.
@@ -24,6 +26,16 @@ class Messenger:
         except socket.error:
             raise RuntimeError("Could not connect to oxd-server on port {}"
                                .format(self.port))
+
+    def __json_object_hook(self, d):
+        """function to customized the json.loads to return named tuple instead
+        of a dict"""
+        return namedtuple('response', d.keys())(*d.values())
+
+    def __json2obj(self, data):
+        """Helper function which converts the json string into a namedtuple
+        so the reponse values can be accessed like objects instead of dicts"""
+        return json.loads(data, object_hook=self.__json_object_hook)
 
     def send(self, command):
         """send function sends the command to the oxD server and recieves the
@@ -60,7 +72,7 @@ class Messenger:
 
             # Find out the length of the response
             if len(part) > 0 and resp_length == 0:
-                resp_length = int(part[0:3])
+                resp_length = int(part[0:4])
                 part = part[4:]
 
             # Set Done flag
@@ -71,5 +83,5 @@ class Messenger:
             parts.append(part)
 
         response = "".join(parts)
-        # return the JSON as a dict
-        return json.loads(response)
+        # return the JSON as a namedtuple object
+        return self.__json2obj(response)

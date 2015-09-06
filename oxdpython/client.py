@@ -32,4 +32,5 @@ class Client:
                        "discovery_url": url
                        }
                    }
-        return self.msgr.send(command)
+        response = self.msgr.send(command)
+        return response
