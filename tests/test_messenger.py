@@ -31,7 +31,7 @@ def test_send():
     """test send method of Messenger"""
     msgr = Messenger(8099)
     response = msgr.send({"command": "test"})
-    assert 'status' in response.keys()
+    assert response.status
 
     # should raise error when oxd server is not running
     msgr2 = Messenger(4000)  # port 4000 in not oxd hence not running

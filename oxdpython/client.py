@@ -4,19 +4,22 @@ from .messenger import Messenger
 class Client:
     """Client is the main class that carries out the commands to talk with the
     oxD server. The oxD request commands are provided as class methods that
-    can be called to send the command to the oxD server via socket and the 
+    can be called to send the command to the oxD server via socket and the
     reponse is returned as a dict by the called method.
     """
 
-    def __init__(self, port=8099):
+    def __init__(self, issuer, oxd_port=8099):
         """Constructor of class Client
         Args:
-            port (integer) - Client is initialized with the port number at
+            issuer (string) - URL of the issuer domain. e.g., gluu.example.com
+
+            oxdport (integer) - Client is initialized with the port number at
                              which the oxD server is listening. It has a
                              default value 8099
         """
-        self.port = port
-        self.msgr = Messenger(port)
+        self.issuer = issuer
+        self.oxd_port = oxd_port
+        self.msgr = Messenger(self.oxd_port)
 
     def discovery(self, url):
         """Runs the discovery command on the oxD server.

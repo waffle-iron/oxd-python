@@ -2,13 +2,15 @@ from nose.tools import assert_equal
 
 from oxdpython import Client
 
-host = 'https://seed.gluu.org'
+issuer = 'https://gluu.example.com'
 
 
-def test_discovery():
+def test_initialization():
     """tests the discovery command of the client"""
-    c = Client()
-    response = c.discovery(host+"/.well-known/openid-configuration")
-    assert_equal(response.status, 'ok')
-    assert response.data
-    assert_equal(response.data.issuer, 'https://seed.gluu.org')
+    c = Client(issuer)
+    assert_equal(c.issuer, issuer)
+    assert_equal(c.oxd_port, 8099)
+
+    c2 = Client(issuer, oxd_port=8888)
+    assert_equal(c2.issuer, issuer)
+    assert_equal(c2.oxd_port, 8888)
