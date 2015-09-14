@@ -9,14 +9,20 @@ class Client:
     reponse is returned as a dict by the called method.
     """
 
-    def __init__(self, issuer, oxd_port=8099):
+    def __init__(self, issuer, redirect_uris, oxd_port=8099, **kwargs):
         """Constructor of class Client
         Args:
-            issuer (string) - URL of the issuer domain. e.g., gluu.example.com
+            issuer (string) - Base URL of the Resource Provider
+                              e.g., gluu.example.com
+
+            redirect_uris (list) - list of redirect URIs values that will be
+                                  used by the client. Passed with each auth
+                                  request to the Resource Provider
 
             oxdport (integer) - Client is initialized with the port number at
                              which the oxD server is listening. It has a
                              default value 8099
+            **kwargs - Other client metadata
         """
         self.issuer = issuer
         self.oxd_port = oxd_port
