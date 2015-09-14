@@ -14,3 +14,9 @@ def test_initialization():
     c2 = Client(issuer, oxd_port=8888)
     assert_equal(c2.issuer, issuer)
     assert_equal(c2.oxd_port, 8888)
+
+
+def test_client_discovery():
+    c = Client(issuer)
+    discovered = c.execute('discovery')
+    assert_equal(discovered.issuer, issuer)

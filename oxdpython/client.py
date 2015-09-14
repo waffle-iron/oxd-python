@@ -1,4 +1,5 @@
 from .messenger import Messenger
+from .discovery import Discovery
 
 
 class Client:
@@ -21,19 +22,23 @@ class Client:
         self.oxd_port = oxd_port
         self.msgr = Messenger(self.oxd_port)
 
-    def discovery(self, url):
-        """Runs the discovery command on the oxD server.
+    def __data_or_error(self, response):
+        """Processes the OXD server response object and returns just the data
+        """
+        return response.data
+
+    def execute(self, command):
+        """Task executor based on the command recieved
 
         Args:
-            url (string) - the 'discovery_url' parameter for the command
+            command (string) - Any one of the known ODIC client side actions
+                Available:
+                1. discovery - discover information about OpenID Provider
 
         Returns:
-            response (dict) - the JSON response from the server as a dict
+            response (object) - the JSON response as an object
         """
-        command = {"command": "discovery",
-                   "params": {
-                       "discovery_url": url
-                       }
-                   }
-        response = self.msgr.send(command)
-        return response
+        if command == 'discovery':
+            d = Discovery(self.issuer)
+            resp = self.msgr.send(d.msg)
+            return self.__data_or_error(resp)
