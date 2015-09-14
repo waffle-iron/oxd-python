@@ -58,3 +58,14 @@ def test_client_discovery():
     c = Client(issuer, redirects)
     discovered = c.execute('discovery')
     assert_equal(discovered.issuer, issuer)
+
+
+def test_client_registration():
+    c = Client(issuer, redirects, client_name="oxD Python Test",
+               response_types="code id_token token",  # TODO update to list
+               app_type="web",
+               grant_types="authorization_code implicit",
+               redirect_url="https://rs.gluu.org/resources",
+               )
+    registered = c.execute('register')
+    assert registered.client_id

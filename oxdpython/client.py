@@ -1,5 +1,6 @@
 from .messenger import Messenger
 from .discovery import Discovery
+from .register import Register
 
 
 class Client:
@@ -27,7 +28,14 @@ class Client:
         self.issuer = issuer
         self.oxd_port = oxd_port
         self.msgr = Messenger(self.oxd_port)
+        self.redirect_uris = redirect_uris
+        self.metadata = kwargs
+        self.metadata['discovery_url'] = "{}/.well-known/openid-configuration".\
+            format(issuer)
+        # FIXME fix the redirect urls with the oxD implemetation vs OIDC
+        # self.metadata['redirect_uris'] = redirect_uris
 
+        # TODO make accessing metadata better
         keys = kwargs.keys()
         for key in keys:
             setattr(self, key, kwargs[key])
@@ -44,11 +52,15 @@ class Client:
             command (string) - Any one of the known ODIC client side actions
                 Available:
                 1. discovery - discover information about OpenID Provider
+                2. register - register the client with the OP
 
         Returns:
             response (object) - the JSON response as an object
         """
         if command == 'discovery':
-            d = Discovery(self.issuer)
-            resp = self.msgr.send(d.msg)
-            return self.__data_or_error(resp)
+            cmd_class = Discovery(self.metadata['discovery_url'])
+        elif command == 'register':
+            cmd_class = Register(self.metadata)
+
+        resp = self.msgr.send(cmd_class.msg)
+        return self.__data_or_error(resp)
