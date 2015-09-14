@@ -28,6 +28,10 @@ class Client:
         self.oxd_port = oxd_port
         self.msgr = Messenger(self.oxd_port)
 
+        keys = kwargs.keys()
+        for key in keys:
+            setattr(self, key, kwargs[key])
+
     def __data_or_error(self, response):
         """Processes the OXD server response object and returns just the data
         """
