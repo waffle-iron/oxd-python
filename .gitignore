@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# generated test config files
+tests/*.cfg
