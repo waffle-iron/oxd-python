@@ -14,17 +14,9 @@ class Client:
     def __init__(self, config_location):
         """Constructor of class Client
         Args:
-            issuer (string) - Base URL of the Resource Provider
-                              e.g., gluu.example.com
-
-            redirect_uris (list) - list of redirect URIs values that will be
-                                  used by the client. Passed with each auth
-                                  request to the Resource Provider
-
-            oxdport (integer) - Client is initialized with the port number at
-                             which the oxD server is listening. It has a
-                             default value 8099
-            **kwargs - Other client metadata
+            config_location (string) - The complete path of the location of
+                the config file which is a modified conpy of the sample.cfg
+                from this library
         """
         self.config = Configurer(config_location)
 
