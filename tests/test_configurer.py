@@ -3,12 +3,13 @@ from nose.tools import assert_true, assert_equal, assert_is_none
 
 from oxdpython.configurer import Configurer
 
-location = os.path.dirname(os.path.realpath(__file__))
+this_dir = os.path.dirname(os.path.realpath(__file__))
+location = os.path.join(this_dir, 'data', 'initial.cfg')
 
 
 def test_oxdconfig_looks_for_config_file_while_initialization():
     config = Configurer(location)
-    assert_true(os.path.isfile(config.client_file))
+    assert_true(os.path.isfile(config.config_file))
 
 
 def test_get_function_returns_value_for_set_config_value():

@@ -1,22 +1,13 @@
-import os
-
 from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
 
 class Configurer(object):
     """The class which holds all the information about the client and the OP
     metadata"""
-    def __init__(self, location):
+    def __init__(self, cfg_file):
         self.parser = SafeConfigParser()
-        self.client_file = os.path.join(location, 'oxdpython.cfg')
-
-        # ensure the configuration file exists
-        if not os.path.isfile(self.client_file):
-            self.parser.add_section('client')
-            with open(self.client_file, "w") as cfile:
-                self.parser.write(cfile)
-
-        self.parser.read(self.client_file)
+        self.config_file = cfg_file
+        self.parser.read(self.config_file)
 
     def get(self, section, key):
         """get function reads the config value for the requested section and
