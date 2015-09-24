@@ -15,7 +15,8 @@ def test_oxdconfig_looks_for_config_file_while_initialization():
 def test_get_function_returns_value_for_set_config_value():
     config = Configurer(location)
     # for a set value it should be the set value
-    assert_equal(config.get('oxd', 'port'), '8099')
+    assert_equal(config.get('oxd', 'port'), '8090')
+    assert_equal(config.get('oxd', 'host'), 'localhost')
 
     # for an unset value it should be none
     assert_is_none(config.get('oxd', 'message'))
