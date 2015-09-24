@@ -1,5 +1,6 @@
+import uuid
 import os.path
-from nose.tools import assert_true, assert_equal, assert_is_none
+from nose.tools import assert_true, assert_equal, assert_is_none, assert_false
 
 from oxdpython.configurer import Configurer
 
@@ -21,3 +22,17 @@ def test_get_function_returns_value_for_set_config_value():
     # for an unset value it should be none
     assert_is_none(config.get('oxd', 'message'))
     assert_is_none(config.get('two', 'coffee'))
+
+
+def test_set_function_saves_the_configuratio_to_file():
+    config = Configurer(location)
+    test_id = str(uuid.uuid4())
+    # only allowed sections for a set function are oxd and client
+    assert_true(config.set('oxd', 'id', test_id))
+    assert_true(config.set('client', 'name', 'Test Client'))
+    assert_false(config.set('test', 'key', 'value'))
+
+    # Ensure things have been written to the file
+    config2 = Configurer(location)
+    assert_equal(config2.get('oxd', 'id'), test_id)
+    assert_equal(config2.get('client', 'name'), 'Test Client')
