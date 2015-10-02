@@ -19,7 +19,7 @@ class Configurer(object):
             key (string) - the key for the config value required
 
         Returns:
-            value (multiple) - the function returns the value of the key
+            value (string) - the function returns the value of the key
                                in the appropriate format if found or returns
                                None if such a section or key couldnot be found
 
