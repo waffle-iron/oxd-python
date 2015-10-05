@@ -18,11 +18,9 @@ class Client:
         """
         self.config = Configurer(config_location)
         self.msgr = Messenger(int(self.config.get('oxd', 'port')))
-        self.application_type = self.config.get("client", "app_type")
-        self.primary_redirect_uri = self.config.get("client",
-                                                    "primary_redirect_uri")
-        uris_val = self.config.get("client", "redirect_uris")
-        self.redirect_uris = uris_val.split(",")
+        self.application_type = self.config.get("client", "application_type")
+        self.authorization_redirect_uri = self.config.get("client",
+                                                "authorization_redirect_uri")
 
     def register_site(self):
         """Function to register the site and generate a unique ID for the site
@@ -34,14 +32,25 @@ class Client:
             status (boolean) - Registration of site was successful or not
         """
         command = {"command": "register_site"}
-        params = {"application_type": self.application_type,
-                  "redirect_uris": self.redirect_uris,
-                  "authorization_redirect_uri": self.primary_redirect_uri,
-                  }
+
+        # add required params for the command
+        params = {"authorization_redirect_uri": self.authorization_redirect_uri}
+        # add other optional params if they exist in config
+        opt_params = ["logout_redirect_uri", "redirect_uris", "acr_values",
+                      "client_jwks_uri", "client_token_endpoint_auth_method",
+                      "client_request_uris", "contacts"]
+        for param in opt_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param)
+                # create a list if Comma seperated
+                if "," in value:
+                    value = value.split(",")
+                params[param] = value
+
         command["params"] = params
         response = self.msgr.send(command)
 
-        if response.status != 'ok':
+        if response.status != "ok":
             return False
 
         self.oxd_id = response.data.oxd_id
@@ -59,6 +68,10 @@ class Client:
             auth_url (string) - the authorization url that the user must access
                                 for authentication and authorization
         """
+        if self.config.get("oxd", "id"):
+            self.oxd_id = self.config.get("oxd", "id")
+        else:
+            raise RuntimeError('Oxd ID is not yet set. Run register_client()')
         command = {"command": "get_authorization_url"}
         params = {"oxd_id": self.oxd_id}
         command["params"] = params

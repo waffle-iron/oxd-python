@@ -1,7 +1,7 @@
 import os
 
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
-    assert_regexp_matches
+    assert_regexp_matches, assert_raises
 
 from oxdpython import Client
 from oxdpython.messenger import Messenger
@@ -12,13 +12,11 @@ config_location = os.path.join(this_dir, 'data', 'initial.cfg')
 
 def test_client_initializes_with_config():
     c = Client(config_location)
-    assert_equal(c.config.get('oxd', 'port'), '8090')
+    assert_equal(c.config.get('oxd', 'port'), '8099')
     assert_is_instance(c.msgr, Messenger)
     assert_equal(c.application_type, "web")
-    assert_equal(c.primary_redirect_uri,
+    assert_equal(c.authorization_redirect_uri,
                  "https://client.example.com/callback")
-    assert_equal(c.redirect_uris, ["https://client.example.com/callback",
-                                   "https://client.example.com/callback2"])
 
 
 def test_client_register_site_command():
@@ -33,3 +31,9 @@ def test_client_can_get_authorization_url():
     assert_regexp_matches(auth_url, 'client_id')
     assert_regexp_matches(auth_url, 'response_type')
     assert_regexp_matches(auth_url, 'redirect_uri')
+
+
+def test_client_get_authorization_url_raises_error_for_no_oxdid():
+    c = Client(os.path.join(this_dir, 'data', 'no_oxdid.cfg'))
+    with assert_raises(RuntimeError):
+        c.get_authorization_url()
