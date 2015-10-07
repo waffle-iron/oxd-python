@@ -17,9 +17,10 @@ def test_client_initializes_with_config():
     assert_equal(c.application_type, "web")
     assert_equal(c.authorization_redirect_uri,
                  "https://client.example.com/callback")
+    assert_is_instance(c.oxd_id, str)
 
 
-def test_client_register_site_command():
+def xtest_client_register_site_command():
     c = Client(config_location)
     status = c.register_site()
     assert_true(status)
@@ -31,9 +32,3 @@ def test_client_can_get_authorization_url():
     assert_regexp_matches(auth_url, 'client_id')
     assert_regexp_matches(auth_url, 'response_type')
     assert_regexp_matches(auth_url, 'redirect_uri')
-
-
-def test_client_get_authorization_url_raises_error_for_no_oxdid():
-    c = Client(os.path.join(this_dir, 'data', 'no_oxdid.cfg'))
-    with assert_raises(RuntimeError):
-        c.get_authorization_url()
