@@ -20,10 +20,12 @@ def test_client_initializes_with_config():
     assert_is_instance(c.oxd_id, str)
 
 
-def xtest_client_register_site_command():
+def test_client_register_site_command():
     c = Client(config_location)
-    status = c.register_site()
-    assert_true(status)
+    c.oxd_id = None
+    assert_equal(c.oxd_id, None)
+    c.register_site()
+    assert_true(len(c.oxd_id) > 0)
 
 
 def test_client_can_get_authorization_url():

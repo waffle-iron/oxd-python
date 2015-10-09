@@ -83,4 +83,9 @@ class Client:
         command["params"] = params
         response = self.msgr.send(command)
 
+        if response.status == "error":
+            error = "OxD Server Error: {0}\nDescription:{1}".format(
+                    response.data.error, response.data.error_description)
+            raise RuntimeError(error)
+
         return response.data.authorization_url
