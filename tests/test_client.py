@@ -45,7 +45,7 @@ def test_register_raises_runtime_error_for_oxd_error_response(mock_send):
 
 
 @patch.object(Messenger, 'send')
-def test_can_get_authorization_url(mock_send):
+def test_get_authorization_url(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.authorization_url = "mock_url"
@@ -56,6 +56,17 @@ def test_can_get_authorization_url(mock_send):
     auth_url = c.get_authorization_url()
     mock_send.assert_called_with(command)
     assert_equal(auth_url, "mock_url")
+
+
+@patch.object(Client, 'register_site')
+@patch.object(Messenger, 'send')
+def test_get_authorization_url_calls_register_if_no_oxdid(mock_send, mock_register):
+    config_loc = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
+    c = Client(config_loc)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.authorization_url = "mock_url"
+    c.get_authorization_url()
+    mock_register.assert_called_with()
 
 
 @patch.object(Messenger, 'send')
