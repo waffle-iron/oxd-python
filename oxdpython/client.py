@@ -89,3 +89,53 @@ class Client:
             raise RuntimeError(error)
 
         return response.data.authorization_url
+
+    def get_tokens_by_code(self, code, scopes, state):
+        """Function to get access code for getting the user details from the
+        OP. It is called after the user authorizies by visiting the auth URL.
+
+        Args:
+            code (string) - code obtained from the auth url callback
+            scopes (list) - scopes authorized by the OP, fromt he url callback
+            state (string) - state key obtained from the auth url callback
+
+        Returns:
+            access_token (string) - the access token which should be passed to
+                                    get the user information from the OP
+        """
+        if not (code and scopes) or type(scopes) != list:
+            raise RuntimeError("Empty code or scopes value.\n"
+                               "Code: {0}\nScopes: {1}".format(code, scopes))
+
+        command = {"command": "get_tokens_by_code"}
+        params = {"oxd_id": self.oxd_id}
+        params["code"] = code
+        params["scopes"] = scopes
+
+        if state:
+            params["state"] = state
+
+        command["params"] = params
+        response = self.msgr.send(command)
+
+        return response.data.access_token
+
+    def get_user_info(self, access_code):
+        """Function to get the information about the user using the access code
+        obtained from the OP
+
+        Args:
+            access_code (string) - access code from the get_access_code func
+
+        Returns:
+            claims (object) - the user data claims that are returned by the OP
+        """
+        if not access_code:
+            raise RuntimeError("Empty access code")
+
+        command = {"command": "get_user_info"}
+        params = {"oxd_id": self.oxd_id}
+        params["access_code"] = access_code
+        command["params"] = params
+        response = self.msgr.send(command)
+        return response.data.claims
