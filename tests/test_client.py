@@ -3,7 +3,6 @@ import os
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
     assert_regexp_matches, assert_raises
 from mock import patch
-from collections import namedtuple
 
 from oxdpython import Client
 from oxdpython.messenger import Messenger
@@ -25,8 +24,8 @@ def test_client_initializes_with_config():
 @patch.object(Messenger, 'send')
 def test_client_register_site_command(mock_send):
     # preset register client command response
-    data = namedtuple("data", "oxd_id")("mock-oxd-id")
-    mock_send.return_value = namedtuple("response", "status, data")("ok", data)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.oxd_id = "mock-oxd-id"
     c = Client(config_location)
     c.oxd_id = None
     assert_equal(c.oxd_id, None)
@@ -36,9 +35,9 @@ def test_client_register_site_command(mock_send):
 
 @patch.object(Messenger, 'send')
 def test_client_raises_runtime_error_for_oxd_error_response(mock_send):
-    data = namedtuple("data", "error, error_description")("Error", "MockError")
-    mock_send.return_value = namedtuple("response", "status, data")("error",
-                                                                    data)
+    mock_send.return_value.status = "error"
+    mock_send.return_value.data.error = "MockError"
+    mock_send.return_value.data.error_description = "MockError created to test"
     config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
     c = Client(config)
     with assert_raises(RuntimeError):
