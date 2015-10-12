@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 config = os.path.join(this_dir, 'demosite.cfg')
@@ -29,9 +29,11 @@ def authorize():
     return redirect(auth_url)
 
 
-@app.route('/callback/')
+@app.route('/callback')
 def callabck():
-    return "Callback has been called."
+    args = str(request.args)
+    return args
+
 
 if __name__ == "__main__":
     app.run(debug=True)
