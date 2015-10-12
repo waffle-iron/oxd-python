@@ -11,7 +11,7 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 config_location = os.path.join(this_dir, 'data', 'initial.cfg')
 
 
-def test_client_initializes_with_config():
+def test_initializes_with_config():
     c = Client(config_location)
     assert_equal(c.config.get('oxd', 'port'), '8099')
     assert_is_instance(c.msgr, Messenger)
@@ -22,7 +22,7 @@ def test_client_initializes_with_config():
 
 
 @patch.object(Messenger, 'send')
-def test_client_register_site_command(mock_send):
+def test_register_site_command(mock_send):
     # preset register client command response
     mock_send.return_value.status = "ok"
     mock_send.return_value.data.oxd_id = "mock-oxd-id"
@@ -34,7 +34,7 @@ def test_client_register_site_command(mock_send):
 
 
 @patch.object(Messenger, 'send')
-def test_client_raises_runtime_error_for_oxd_error_response(mock_send):
+def test_register_raises_runtime_error_for_oxd_error_response(mock_send):
     mock_send.return_value.status = "error"
     mock_send.return_value.data.error = "MockError"
     mock_send.return_value.data.error_description = "MockError created to test"
@@ -45,19 +45,24 @@ def test_client_raises_runtime_error_for_oxd_error_response(mock_send):
 
 
 @patch.object(Messenger, 'send')
-def test_client_can_get_authorization_url(mock_send):
+def test_can_get_authorization_url(mock_send):
     c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.authorization_url = "mock_url"
     command = {"command": "get_authorization_url",
                "params": {
                    "oxd_id": c.oxd_id
                    }}
-    c.get_authorization_url()
+    auth_url = c.get_authorization_url()
     mock_send.assert_called_with(command)
+    assert_equal(auth_url, "mock_url")
 
 
 @patch.object(Messenger, 'send')
-def test_client_get_tokens_by_code(mock_send):
+def test_get_tokens_by_code(mock_send):
     c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.access_token = "mock-token"
     code = "code"
     state = "state"
     scopes = ["openid"]
@@ -68,11 +73,12 @@ def test_client_get_tokens_by_code(mock_send):
                    "state": state,
                    "scopes": scopes
                    }}
-    c.get_tokens_by_code(code, scopes, state)
+    access_token = c.get_tokens_by_code(code, scopes, state)
     mock_send.assert_called_with(command)
+    assert_equal(access_token, "mock-token")
 
 
-def test_client_get_tokens_raises_error_for_invalid_args():
+def test_get_tokens_raises_error_for_invalid_args():
     c = Client(config_location)
     # Empty code should raise error
     with assert_raises(RuntimeError):
@@ -88,20 +94,45 @@ def test_client_get_tokens_raises_error_for_invalid_args():
 
 
 @patch.object(Messenger, 'send')
-def test_client_get_user_info(mock_send):
+def test_get_tokens_raises_error_if_response_has_error(mock_send):
     c = Client(config_location)
-    code = "tokken"
+    mock_send.return_value.status = "error"
+    mock_send.return_value.data.error = "MockError"
+    mock_send.return_value.data.error_description = "No Tokens in Mock"
+
+    with assert_raises(RuntimeError):
+        c.get_tokens_by_code("code", ["openid"], "state")
+
+
+@patch.object(Messenger, 'send')
+def test_get_user_info(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.claims = {"name": "mocky"}
+    token = "tokken"
     command = {"command": "get_user_info",
                "params": {
                    "oxd_id": c.oxd_id,
-                   "access_code": code
+                   "access_token": token
                    }}
-    c.get_user_info(code)
+    claims = c.get_user_info(token)
     mock_send.assert_called_with(command)
+    assert_equal(claims, {"name": "mocky"})
 
 
-def test_client_get_user_info_raises_erro_on_invalid_args():
+def test_get_user_info_raises_erro_on_invalid_args():
     c = Client(config_location)
     # Empty code should raise error
     with assert_raises(RuntimeError):
         c.get_user_info("")
+
+
+@patch.object(Messenger, 'send')
+def test_get_user_info_raises_error_on_oxd_error(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "error"
+    mock_send.return_value.data.error = "MockError"
+    mock_send.return_value.data.error_description = "No Claims for mock"
+
+    with assert_raises(RuntimeError):
+        c.get_user_info("some_token")

@@ -19,11 +19,23 @@ class Client:
         self.config = Configurer(config_location)
         self.msgr = Messenger(int(self.config.get('oxd', 'port')))
         self.application_type = self.config.get("client", "application_type")
-        self.authorization_redirect_uri = self.config.get("client",
-                                                "authorization_redirect_uri")
+        self.authorization_redirect_uri = self.config.get(
+            "client",
+            "authorization_redirect_uri")
         self.oxd_id = None
         if self.config.get("oxd", "id"):
             self.oxd_id = self.config.get("oxd", "id")
+
+    def __clear_data(self, response):
+        """A private method that verifies that the oxd response is error free
+        and raises a RuntimeError when it encounters an error
+        """
+        if response.status == "error":
+            error = "OxD Server Error: {0}\nDescription:{1}".format(
+                    response.data.error, response.data.error_description)
+            raise RuntimeError(error)
+        elif response.status == "ok":
+            return response.data
 
     def register_site(self):
         """Function to register the site and generate a unique ID for the site
@@ -37,11 +49,13 @@ class Client:
         command = {"command": "register_site"}
 
         # add required params for the command
-        params = {"authorization_redirect_uri": self.authorization_redirect_uri}
+        params = {"authorization_redirect_uri":
+                  self.authorization_redirect_uri}
         # add other optional params if they exist in config
         opt_params = ["logout_redirect_uri", "client_jwks_uri",
                       "client_token_endpoint_auth_method"]
-        opt_list_params = ["acr_values", "redirect_uris", "client_request_uris", "contacts"]
+        opt_list_params = ["acr_values", "redirect_uris", "contacts",
+                           "client_request_uris"]
         for param in opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
@@ -55,12 +69,7 @@ class Client:
         command["params"] = params
         response = self.msgr.send(command)
 
-        if response.status == "error":
-            error = "OxD Server Error: {0}\nDescription:{1}".format(
-                    response.data.error, response.data.error_description)
-            raise RuntimeError(error)
-
-        self.oxd_id = response.data.oxd_id
+        self.oxd_id = self.__clear_data(response).oxd_id
         self.config.set("oxd", "id", self.oxd_id)
 
     def get_authorization_url(self):
@@ -83,12 +92,7 @@ class Client:
         command["params"] = params
         response = self.msgr.send(command)
 
-        if response.status == "error":
-            error = "OxD Server Error: {0}\nDescription:{1}".format(
-                    response.data.error, response.data.error_description)
-            raise RuntimeError(error)
-
-        return response.data.authorization_url
+        return self.__clear_data(response).authorization_url
 
     def get_tokens_by_code(self, code, scopes, state):
         """Function to get access code for getting the user details from the
@@ -118,24 +122,25 @@ class Client:
         command["params"] = params
         response = self.msgr.send(command)
 
-        return response.data.access_token
+        return self.__clear_data(response).access_token
 
-    def get_user_info(self, access_code):
+    def get_user_info(self, access_token):
         """Function to get the information about the user using the access code
         obtained from the OP
 
         Args:
-            access_code (string) - access code from the get_access_code func
+            access_token (string) - access token from the get_tokens_by_code
+                                    function
 
         Returns:
             claims (object) - the user data claims that are returned by the OP
         """
-        if not access_code:
+        if not access_token:
             raise RuntimeError("Empty access code")
 
         command = {"command": "get_user_info"}
         params = {"oxd_id": self.oxd_id}
-        params["access_code"] = access_code
+        params["access_token"] = access_token
         command["params"] = params
         response = self.msgr.send(command)
-        return response.data.claims
+        return self.__clear_data(response).claims
