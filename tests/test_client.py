@@ -3,6 +3,7 @@ import os
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
     assert_regexp_matches, assert_raises
 from mock import patch
+from collections import namedtuple
 
 from oxdpython import Client
 from oxdpython.messenger import Messenger
@@ -21,28 +22,38 @@ def test_client_initializes_with_config():
     assert_is_instance(c.oxd_id, str)
 
 
-def test_client_register_site_command():
+@patch.object(Messenger, 'send')
+def test_client_register_site_command(mock_send):
+    # preset register client command response
+    data = namedtuple("data", "oxd_id")("mock-oxd-id")
+    mock_send.return_value = namedtuple("response", "status, data")("ok", data)
     c = Client(config_location)
     c.oxd_id = None
     assert_equal(c.oxd_id, None)
     c.register_site()
-    assert_true(len(c.oxd_id) > 0)
+    assert_equal(c.oxd_id, "mock-oxd-id")
 
 
-def test_client_raises_runtime_error_for_oxd_error_response():
+@patch.object(Messenger, 'send')
+def test_client_raises_runtime_error_for_oxd_error_response(mock_send):
+    data = namedtuple("data", "error, error_description")("Error", "MockError")
+    mock_send.return_value = namedtuple("response", "status, data")("error",
+                                                                    data)
     config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
     c = Client(config)
     with assert_raises(RuntimeError):
         c.register_site()
 
 
-def test_client_can_get_authorization_url():
+@patch.object(Messenger, 'send')
+def test_client_can_get_authorization_url(mock_send):
     c = Client(config_location)
-    auth_url = c.get_authorization_url()
-
-    assert_regexp_matches(auth_url, 'client_id')
-    assert_regexp_matches(auth_url, 'response_type')
-    assert_regexp_matches(auth_url, 'redirect_uri')
+    command = {"command": "get_authorization_url",
+               "params": {
+                   "oxd_id": c.oxd_id
+                   }}
+    c.get_authorization_url()
+    mock_send.assert_called_with(command)
 
 
 @patch.object(Messenger, 'send')
@@ -62,8 +73,7 @@ def test_client_get_tokens_by_code(mock_send):
     mock_send.assert_called_with(command)
 
 
-@patch.object(Messenger, 'send')
-def test_client_get_tokens_raises_error_for_invalid_args(mock_send):
+def test_client_get_tokens_raises_error_for_invalid_args():
     c = Client(config_location)
     # Empty code should raise error
     with assert_raises(RuntimeError):
@@ -91,8 +101,7 @@ def test_client_get_user_info(mock_send):
     mock_send.assert_called_with(command)
 
 
-@patch.object(Messenger, 'send')
-def test_client_get_user_info_raises_erro_on_invalid_args(mock_send):
+def test_client_get_user_info_raises_erro_on_invalid_args():
     c = Client(config_location)
     # Empty code should raise error
     with assert_raises(RuntimeError):
