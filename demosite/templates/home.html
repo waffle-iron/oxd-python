@@ -6,12 +6,154 @@
 {% block content %}
 <div class="jumbotron">
     <h1>OxD Python Demo Site</h1>
-    <p>This is a demo site showcasing the OxD Python Library</p>
+    <p>This is a demo site showcasing the OxD Python Library. The demo site is written in Python <a href="http://flask.pocoo.org">Flask</a> and shows the library can be used with the Flask to perform OpenID based authentication. </p>
 </div>
 <div class="row">
     <div class="col-md-12">
-        <p>Click auhtorize to fetch authorization code and redirect you to the authorization page.</p>
-        <a class="btn btn-primary" href="{{url_for('authorize')}}">Authorize</a>
+            </div>
+</div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Configuration File</h3>
+            <p>Website specific configuration information is stored in a config file. This is necessary for
+               storing persistant information like Oxd ID generated during the site registration with the Open ID provider.
+               The <code>demosite.cfg</code> shows the config file used for this demosite. The complete documentation about the config file can be obtained
+               <a href="https://github.com/GluuFederation/oxd-python/blob/master/sample.cfg">here in Github</a>
+            </p>
+        </div>
+        <div class="col-md-6">
+            <h3>demosite.cfg</h3>
+            <pre class="prettyprint">
+[oxd]
+host = localhost
+port = 8099
+
+[client]
+application_type = web
+authorization_redirect_uri = https://client.example.com/callback
+redirect_uris = https://client.example.com/callback
+logout_redirect_uri = 
+acr_values = basic,duo
+client_jwks_uri = 
+client_token_endpoint_auth_method = 
+client_request_uris = 
+contacts = demo@example.com</pre>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Initializing oxD Python</h3>
+        <p>oxD Python is provides the <code>Client</code> class to perform all its operations. The client is to be initialzed with the config file
+        location to that the site specific configuration like callback URLs could be registered with the OP</p>
+    </div>
+    <div class="col-md-6">
+        <h3>In Flask</h3>
+        <pre class="prettyprint lang-python">
+import os
+import oxdpython
+
+from flask import Flask, request, redirect, render_template
+
+this_dir = os.path.dirname(os.path.realpath(__file__))
+config = os.path.join(this_dir, 'demosite.cfg')
+
+app = Flask(__name__)
+client = oxdpython.Client(config)
+</pre>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Registration and Fetching Auth URL</h3>
+        <p>The first step is to register the client with the OP. Once the client is registered, then the user data can be fetched upon user authorization.
+        oxD Python performs client registration automatically when you request for an authorization url. Redirect the user to the authorization url to get user
+        consent.</p>
+        <hr>
+        <p><strong> Live demo. </strong><a class="btn btn-primary" href="{{ url_for('authorize') }}">Go to Authorization Page</a></p>
+    </div>
+    <div class="col-md-6">
+    <pre class="prettyprint lang-python">
+@app.route('/authorize/')
+def authorize():
+    """The endpoint which is to be accessed but the user in order to start the authorization by the user"""
+
+    auth_url = client.get_authorization_url()
+    return redirect(auth_url)
+    </pre>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+    <h3>Get user information</h3>
+    <p>Once the user authorizes the website to use the information from the OP, the OP calls back the website with code and scopes for accessing the user data in the registered callback <code>authorization_redirect_uri</code> in the config file). Then an access token is obtained from the OP using which user claims can be requested.</p>
+    </div>
+    <div class="col-md-6">
+    <pre class="prettyprint lang-python">
+@app.route('/callback')
+def callabck():
+    # parse the state, code and scopes from the callback url
+    state = request.args.get('state')
+    code = request.args.get('code')
+    scopes = request.args.get('scope').split(" ")
+
+    # pass that information to obtain the access_token
+    token = client.get_tokens_by_code(code, scopes, state)
+
+    # usign the access token obtain user info
+    user = client.get_user_info(token)
+
+    return render_template("home.html", user=user)
+</pre>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Using the user claims</h3>
+        <p>Once the user data is obtained, you can choose to do what ever you want with it. Like creating a business card below.</p>
+        {% if user %}
+        <div class="panel">
+        <div class="media" style="border: 1px #CCC solid; background-color: #DDD;">
+            <div class="media-left">
+                <img class="media-object" src="{{ user.picture[0] }}" alt="User Picture">
+            </div>
+            <div class="media-body">
+                <h4 class="media-heading">{{ user.name[0] }}</h4>
+                <p><strong>Birthday: </strong>{{user.birthdate[0]}}</p>
+                <p><strong>Nickname: </strong>{{user.nickname[0]}}</p>
+                <p><strong>Gender: </strong>{{user.gender[0]}}</p>
+                <p><strong>Timezone: </strong>{{user.zoneinfo[0]}}</p>
+                <p><strong>Profile: </strong><a href="{{user.profile[0]}}">Profile Page</a></p>
+                <p><strong>Website: </strong><a href="{{user.website[0]}}">{{user.website[0]}}</a></p>
+                <p><strong>inum: </strong>{{user.inum[0]}}</p>
+            </div>
+        </div></div>
+        {% else %}
+            <div class="alert alert-warning">No business card for you. You haven't authorized the demo user yet.</div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+    <h3>Template code</h3>
+{% raw %}
+<pre class="prettyprint lang-html">
+{% if user %}
+&lt;div class="media"&gt;
+  &lt;div class="media-left"&gt;
+    &lt;img class="media-object" src="{{ user.picture[0] }}" alt="User Picture"&gt;
+  &lt;/div&gt;
+  &lt;div class="media-body"&gt;
+    &lt;h4 class="media-heading"&gt;{{ user.name[0] }}&lt;/h4&gt;
+    &lt;p&gt;&lt;strong&gt;Birthday: &lt;/strong&gt;{{user.birthdate[0]}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Nickname: &lt;/strong&gt;{{user.nickname[0]}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Gender: &lt;/strong&gt;{{user.gender[0]}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Timezone: &lt;/strong&gt;{{user.zoneinfo[0]}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Profile: &lt;/strong&gt;&lt;a href="{{user.profile[0]}}"&gt;Profile Page&lt;/a&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Website: &lt;/strong&gt;&lt;a href="{{user.website[0]}}"&gt;{{user.website[0]}}&lt;/a&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;inum: &lt;/strong&gt;{{user.inum[0]}}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endif %}
+</pre>
+{% endraw %}
     </div>
 </div>
 {% endblock content %}

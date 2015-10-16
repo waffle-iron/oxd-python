@@ -41,7 +41,7 @@ def callabck():
     user = oxc.get_user_info(token)
     print "\n\nrecived user: {}".format(user)
 
-    return "User Name: {}".format(user.name)
+    return render_template("home.html", user=user)
 
 if __name__ == "__main__":
     app.run(debug=True, port=80)
