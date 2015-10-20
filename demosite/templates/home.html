@@ -109,24 +109,13 @@ def callabck():
 <div class="row">
     <div class="col-md-6">
         <h3>Using the user claims</h3>
-        <p>Once the user data is obtained, you can choose to do what ever you want with it. Like creating a business card below.</p>
+        <p>Once the user data is obtained, the various claims supported by the OP can be used as required.</p>
         {% if user %}
         <div class="panel">
-        <div class="media" style="border: 1px #CCC solid; background-color: #DDD;">
-            <div class="media-left">
-                <img class="media-object" src="{{ user.picture[0] }}" alt="User Picture">
-            </div>
-            <div class="media-body">
-                <h4 class="media-heading">{{ user.name[0] }}</h4>
-                <p><strong>Birthday: </strong>{{user.birthdate[0]}}</p>
-                <p><strong>Nickname: </strong>{{user.nickname[0]}}</p>
-                <p><strong>Gender: </strong>{{user.gender[0]}}</p>
-                <p><strong>Timezone: </strong>{{user.zoneinfo[0]}}</p>
-                <p><strong>Profile: </strong><a href="{{user.profile[0]}}">Profile Page</a></p>
-                <p><strong>Website: </strong><a href="{{user.website[0]}}">{{user.website[0]}}</a></p>
-                <p><strong>inum: </strong>{{user.inum[0]}}</p>
-            </div>
-        </div></div>
+            {% for field in user._fields %}
+                <p>{{ field }} :: {{user|attr(field)}}</p>
+            {% endfor %}
+        </div>
         {% else %}
             <div class="alert alert-warning">No business card for you. You haven't authorized the demo user yet.</div>
         {% endif %}
@@ -136,21 +125,6 @@ def callabck():
 {% raw %}
 <pre class="prettyprint lang-html">
 {% if user %}
-&lt;div class="media"&gt;
-  &lt;div class="media-left"&gt;
-    &lt;img class="media-object" src="{{ user.picture[0] }}" alt="User Picture"&gt;
-  &lt;/div&gt;
-  &lt;div class="media-body"&gt;
-    &lt;h4 class="media-heading"&gt;{{ user.name[0] }}&lt;/h4&gt;
-    &lt;p&gt;&lt;strong&gt;Birthday: &lt;/strong&gt;{{user.birthdate[0]}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Nickname: &lt;/strong&gt;{{user.nickname[0]}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Gender: &lt;/strong&gt;{{user.gender[0]}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Timezone: &lt;/strong&gt;{{user.zoneinfo[0]}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Profile: &lt;/strong&gt;&lt;a href="{{user.profile[0]}}"&gt;Profile Page&lt;/a&gt;&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Website: &lt;/strong&gt;&lt;a href="{{user.website[0]}}"&gt;{{user.website[0]}}&lt;/a&gt;&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;inum: &lt;/strong&gt;{{user.inum[0]}}&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
 {% endif %}
 </pre>
 {% endraw %}
