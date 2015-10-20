@@ -31,15 +31,15 @@ def authorize():
 
 @app.route('/callback')
 def callabck():
-    state = request.args.get('state')
-    code = request.args.get('code')
-    scopes = request.args.get('scope').split(" ")
-    print "\n\ncalling get_tokens_by_code({0}, {1}, {2})".format(code, scopes, state)
-    token = oxc.get_tokens_by_code(code, scopes, state)
-    print "\n\nrecieved token: {0}".format(token)
-    print "\n\ncalling get_user_info({})".format(token)
+    print request.url
+    if request.args.get('state'):
+        state = request.args.get('state')
+        code = request.args.get('code')
+        scopes = request.args.get('scope').split(" ")
+        token = oxc.get_tokens_by_code(code, scopes, state)
+    else:
+        token = oxc.get_tokens_by_code_by_url(request.url)
     user = oxc.get_user_info(token)
-    print "\n\nrecived user: {}".format(user)
 
     return render_template("home.html", user=user)
 
