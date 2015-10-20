@@ -105,6 +105,23 @@ def test_get_tokens_raises_error_for_invalid_args():
 
 
 @patch.object(Messenger, 'send')
+def test_get_tokens_by_code_by_url(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.access_token = "mock-token"
+    url = "https://client.example.com/callback#state=demo123&code=d1e2m3o4"\
+          "&scopes=openid%20profile"
+    command = {"command": "get_tokens_by_code",
+               "params": {
+                   "oxd_id": c.oxd_id,
+                   "url": url
+                   }}
+    access_token = c.get_tokens_by_code_by_url(url)
+    mock_send.assert_called_with(command)
+    assert_equal(access_token, "mock-token")
+
+
+@patch.object(Messenger, 'send')
 def test_get_tokens_raises_error_if_response_has_error(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "error"

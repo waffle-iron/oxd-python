@@ -94,7 +94,7 @@ class Client:
 
         return self.__clear_data(response).authorization_url
 
-    def get_tokens_by_code(self, code, scopes, state):
+    def get_tokens_by_code(self, code, scopes, state=None):
         """Function to get access code for getting the user details from the
         OP. It is called after the user authorizies by visiting the auth URL.
 
@@ -119,6 +119,26 @@ class Client:
         if state:
             params["state"] = state
 
+        command["params"] = params
+        response = self.msgr.send(command)
+
+        return self.__clear_data(response).access_token
+
+    def get_tokens_by_code_by_url(self, url):
+        """Function to get access code for getting the user details from the
+        OP. It is called after the user authorizies by visiting the auth URL.
+
+        Args:
+            url (string) - the callback url which was called by the OP after
+                           user authorization which has the states, code and
+                           scopes as query parameters
+
+        Returns:
+            access_token (string) - the access token which should be passed to
+                                    get the user information from the OP
+        """
+        command = {"command": "get_tokens_by_code"}
+        params = {"oxd_id": self.oxd_id, "url": url}
         command["params"] = params
         response = self.msgr.send(command)
 
