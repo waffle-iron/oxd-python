@@ -111,7 +111,7 @@ def callabck():
         <h3>Using the user claims</h3>
         <p>Once the user data is obtained, the various claims supported by the OP can be used as required.</p>
         {% if user %}
-        <div class="panel">
+        <div class="alert alert-success">
             {% for field in user._fields %}
                 <p>{{ field }} :: {{user|attr(field)}}</p>
             {% endfor %}
@@ -123,8 +123,13 @@ def callabck():
     <div class="col-md-6">
     <h3>Template code</h3>
 {% raw %}
-<pre class="prettyprint lang-html">
+<pre class="prettyprint lang-jinja">
 {% if user %}
+&lt;div class="alert alert-success"&gt;
+    {% for field in user._fields %}
+        &lt;p&gt;{{ field }} :: {{user|attr(field)}}&lt;/p&gt;
+    {% endfor %}
+&lt;/div&gt;
 {% endif %}
 </pre>
 {% endraw %}
