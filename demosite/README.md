@@ -56,7 +56,7 @@ openssl x509 -req -days 365 -in demosite.csr -signkey demosite.key -out demosite
 Get the source code for demosite
 
 ```
-cd /opt
+cd /var/www/html
 git clone https://github.com/GluuFederation/oxd-python.git
 ```
 
@@ -69,5 +69,8 @@ cp demosite/demosite.conf /etc/apache2/sites-available/demosite.conf
 a2ensite demosite
 serivce apache2 restart
 ```
-
-Now the site should be available at the port 443 responding to all https calls.
+Now the site would be available as the default site for https (port 443) at your domain.
+However the callback urls need to be configured before you can see things working.
+Edit `demosite/demosite.cfg` and change the redirect uris for yor domain. **OR** If you are testing
+at a local server then you can add `client.example.com` to you `/etc/hosts` to point to your 
+IP, instead of editing the uris in the `demosite.cfg` file.
