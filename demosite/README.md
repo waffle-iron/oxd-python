@@ -66,6 +66,7 @@ Deploying the site
 cd oxd-python
 pip install -r requirements.txt
 cp demosite/demosite.conf /etc/apache2/sites-available/demosite.conf
+chown www-data demosite/demosite.cfg
 a2ensite demosite
 serivce apache2 restart
 ```
