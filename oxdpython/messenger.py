@@ -1,7 +1,10 @@
 import json
 import socket
+import logging
 
 from collections import namedtuple
+
+logger = logging.getLogger(__name__)
 
 
 class Messenger:
@@ -18,14 +21,19 @@ class Messenger:
         self.host = 'localhost'
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        logger.debug("Creating a AF_INET, SOCK_STREAM socket.")
+        self.__connect()
 
     def __connect(self):
         """A helper function to make connection."""
         try:
+            logger.debug("Socket connecting to %s:%s", self.host, self.port)
             self.sock.connect((self.host, self.port))
-        except socket.error:
-            raise RuntimeError("Could not connect to oxd-server on port {}"
-                               .format(self.port))
+        except socket.error as e:
+            err = "Unable to connect oxd-server on port {}".format(self.port)
+            logger.critical(err)
+            logger.exception("socket error %s", e)
+            raise RuntimeError(err)
 
     def __json_object_hook(self, d):
         """function to customized the json.loads to return named tuple instead
@@ -55,10 +63,13 @@ class Messenger:
         totalsent = 0
         while totalsent < msg_length+4:
             try:
+                logger.debug("Sending: %s", cmd[totalsent:])
                 sent = self.sock.send(cmd[totalsent:])
                 totalsent = totalsent + sent
-            except socket.error:
+            except socket.error as e:
+                logger.exception("Reconneting due to socket error. %s", e)
                 self.__connect()
+                logger.info("Reconnected to socket.")
 
         # Check and recieve the response if available
         parts = []
@@ -68,10 +79,12 @@ class Messenger:
         while not done:
             part = self.sock.recv(1024)
             if part == "":
+                logger.error("Socket connection broken, read empty.")
+                logger.debug("Shutting down socket and trying reconnection.")
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
                 self.__connect()
-                # TODO log that socket connection was broken at this point.
+                logger.info("Reconnected to socket.")
 
             # Find out the length of the response
             if len(part) > 0 and resp_length == 0:

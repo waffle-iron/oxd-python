@@ -1,5 +1,9 @@
+import logging
+
 from .configurer import Configurer
 from .messenger import Messenger
+
+logger = logging.getLogger(__name__)
 
 
 class Client:
@@ -20,11 +24,14 @@ class Client:
         self.msgr = Messenger(int(self.config.get('oxd', 'port')))
         self.application_type = self.config.get("client", "application_type")
         self.authorization_redirect_uri = self.config.get(
-            "client",
-            "authorization_redirect_uri")
+            "client", "authorization_redirect_uri")
         self.oxd_id = None
         if self.config.get("oxd", "id"):
             self.oxd_id = self.config.get("oxd", "id")
+
+            logger.info("Oxd ID found during initialization. Client is"
+                        " already registered with the OpenID Provider")
+            logger.info("oxd id: %s", self.oxd_id)
 
     def __clear_data(self, response):
         """A private method that verifies that the oxd response is error free
@@ -33,6 +40,7 @@ class Client:
         if response.status == "error":
             error = "OxD Server Error: {0}\nDescription:{1}".format(
                     response.data.error, response.data.error_description)
+            logger.error(error)
             raise RuntimeError(error)
         elif response.status == "ok":
             return response.data
@@ -67,10 +75,14 @@ class Client:
                 params[param] = value
 
         command["params"] = params
+        logger.debug("Sending command `register_site` with params %s",
+                     params)
         response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
 
         self.oxd_id = self.__clear_data(response).oxd_id
         self.config.set("oxd", "id", self.oxd_id)
+        logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
 
     def get_authorization_url(self):
         """Function to get the authorization url that can be opened in the
@@ -90,7 +102,10 @@ class Client:
         params = {"oxd_id": self.oxd_id}
 
         command["params"] = params
+        logger.debug("Sending command `get_authorization_url` with params %s",
+                     params)
         response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).authorization_url
 
@@ -108,8 +123,11 @@ class Client:
                                     get the user information from the OP
         """
         if not (code and scopes) or type(scopes) != list:
-            raise RuntimeError("Empty code or scopes value.\n"
-                               "Code: {0}\nScopes: {1}".format(code, scopes))
+            err_msg = """Empty/Wrong value in place of code or scope.
+                      Code (string): {0}
+                      Scopes (list): {1}""".format(code, scopes)
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
 
         command = {"command": "get_tokens_by_code"}
         params = {"oxd_id": self.oxd_id}
@@ -120,7 +138,10 @@ class Client:
             params["state"] = state
 
         command["params"] = params
+        logger.debug("Sending command `get_tokens_by_code` with params %s",
+                     params)
         response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).access_token
 
@@ -140,7 +161,10 @@ class Client:
         command = {"command": "get_tokens_by_code"}
         params = {"oxd_id": self.oxd_id, "url": url}
         command["params"] = params
+        logger.debug("Sending command `get_tokens_by_code` with params %s",
+                     params)
         response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).access_token
 
@@ -156,11 +180,16 @@ class Client:
             claims (object) - the user data claims that are returned by the OP
         """
         if not access_token:
+            logger.error("Empty access code sent for get_user_info")
             raise RuntimeError("Empty access code")
 
         command = {"command": "get_user_info"}
         params = {"oxd_id": self.oxd_id}
         params["access_token"] = access_token
         command["params"] = params
+        logger.debug("Sending command `get_user_info` with params %s",
+                     params)
         response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
+
         return self.__clear_data(response).claims

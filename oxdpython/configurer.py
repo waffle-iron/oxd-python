@@ -1,4 +1,8 @@
+import logging
+
 from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
+
+logger = logging.getLogger(__name__)
 
 
 class Configurer(object):
@@ -8,6 +12,7 @@ class Configurer(object):
         self.parser = SafeConfigParser()
         self.config_file = cfg_file
         self.parser.read(self.config_file)
+        logger.info("Loading config at: %s", cfg_file)
 
     def get(self, section, key):
         """get function reads the config value for the requested section and
@@ -29,7 +34,8 @@ class Configurer(object):
         """
         try:
             return self.parser.get(section, key)
-        except (NoOptionError, NoSectionError):
+        except (NoOptionError, NoSectionError) as e:
+            logger.warning("%s", e)
             return None
 
     def set(self, section, key, value):
@@ -48,8 +54,8 @@ class Configurer(object):
             success (bool) - a boolean indication of whether the value was
                              stored successfully in the file
         """
-        has_section = self.parser.has_section(section)
-        if not has_section:
+        if not self.parser.has_section(section):
+            logger.warning("Invalid config section: %s", section)
             return False
 
         self.parser.set(section, key, value)
