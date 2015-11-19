@@ -68,7 +68,10 @@ class Messenger:
         while not done:
             part = self.sock.recv(1024)
             if part == "":
-                raise RuntimeError("Socket connection broken.")
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+                self.__connect()
+                # TODO log that socket connection was broken at this point.
 
             # Find out the length of the response
             if len(part) > 0 and resp_length == 0:
