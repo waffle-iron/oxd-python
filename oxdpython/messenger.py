@@ -22,7 +22,7 @@ class Messenger:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.debug("Creating a AF_INET, SOCK_STREAM socket.")
-        self.__connect()
+        self.firstDone = False
 
     def __connect(self):
         """A helper function to make connection."""
@@ -58,6 +58,12 @@ class Messenger:
         cmd_string = json.dumps(command)
         msg_length = len(cmd_string)
         cmd = "{:04d}".format(msg_length) + cmd_string
+
+        # make the first time connection
+        if not self.firstDone:
+            logger.info('Initiating first time socket connection.')
+            self.__connect()
+            self.firstDone = True
 
         # Send the message the to the server
         totalsent = 0
