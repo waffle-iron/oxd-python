@@ -54,6 +54,10 @@ class Client:
         Returns:
             status (boolean) - Registration of site was successful or not
         """
+        if self.oxd_id:
+            logger.info('Client is already registered. ID: %s', self.oxd_id)
+            return self.oxd_id
+
         command = {"command": "register_site"}
 
         # add required params for the command
@@ -83,6 +87,7 @@ class Client:
         self.oxd_id = self.__clear_data(response).oxd_id
         self.config.set("oxd", "id", self.oxd_id)
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
+        return self.oxd_id
 
     def get_authorization_url(self):
         """Function to get the authorization url that can be opened in the
