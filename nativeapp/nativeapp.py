@@ -24,10 +24,7 @@ def get_auth_url():
     logging.debug('Fetching authorization url.')
     auth_url = client.get_authorization_url()
     logging.debug('Calling the auth_url: %s', auth_url)
-    r = requests.get(auth_url, verify=False)
-    print "Status Code: ", r.status_code
-    print "Text: ", r.text
-    print "Headers: ", r.headers
+    return auth_url
 
 
 def register():
@@ -39,7 +36,20 @@ def register():
 def run():
     logging.debug('Starting nativeapp')
     register()
-    get_auth_url()
+    auth_url = get_auth_url()
+    r = requests.get(auth_url, verify=False)
+    print "Status Code: ", r.status_code
+    print "Text: ", r.text
+    print "Headers: ", r.headers
+    print "URL: ", r.url
+
+    token = 123456
+    print "Posting key: %s" % token
+    r2 = requests.post(r.url, data={"username": "admin", "token": token}, verify=False)
+    print "Status Code: ", r2.status_code
+    print "Text: ", r2.text
+    print "Headers: ", r2.headers
+    print "URL: ", r2.url
 
 
 if __name__ == '__main__':
