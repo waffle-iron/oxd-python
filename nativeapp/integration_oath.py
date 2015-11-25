@@ -8,6 +8,7 @@ from org.jboss.seam.security import Identity
 from oath.google_authenticator import from_b32key
 
 import time
+import base64
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -50,7 +51,7 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials.setUsername(username)
         credentials.setUser(user_found)
 
-        secret = credentials.getPassword()
+        secret = base64.b32encode(credentials.getPassword())
 
         token_generated = from_b32key(secret).generate(t=time.time())
 
