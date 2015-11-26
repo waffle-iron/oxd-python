@@ -70,6 +70,21 @@ def test_get_authorization_url_calls_register_if_no_oxdid(mock_send, mock_regist
 
 
 @patch.object(Messenger, 'send')
+def test_get_auth_url_accepts_acr_as_optional_params(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    mock_send.return_value.data.authorization_url = "mock_url"
+    command = {"command": "get_authorization_url",
+               "params": {
+                   "oxd_id": c.oxd_id,
+                   "acr_values": ["basic", "gplus"]
+                   }}
+    auth_url = c.get_authorization_url(["basic", "gplus"])
+    mock_send.assert_called_with(command)
+    assert_equal(auth_url, "mock_url")
+
+
+@patch.object(Messenger, 'send')
 def test_get_tokens_by_code(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "ok"

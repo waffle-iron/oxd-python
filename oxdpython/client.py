@@ -89,12 +89,13 @@ class Client:
         logger.info("Site registration successful. Oxd ID: %s", self.oxd_id)
         return self.oxd_id
 
-    def get_authorization_url(self):
+    def get_authorization_url(self, acr_values=None):
         """Function to get the authorization url that can be opened in the
         browser for the user to provide authorization and authentication
 
         Args:
-            None
+            acr_values (list) - OPTIONAL list of acr values in the order of
+                                priority
 
         Returns:
             auth_url (string) - the authorization url that the user must access
@@ -105,6 +106,9 @@ class Client:
             self.register_site()
 
         params = {"oxd_id": self.oxd_id}
+
+        if acr_values and isinstance(acr_values, list):
+            params["acr_values"] = acr_values
 
         command["params"] = params
         logger.debug("Sending command `get_authorization_url` with params %s",
