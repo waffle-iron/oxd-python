@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def get_auth_url():
     logging.debug('Fetching authorization url.')
-    auth_url = client.get_authorization_url()
+    auth_url = client.get_authorization_url(['oath'])
     logging.debug('Calling the auth_url: %s', auth_url)
     return auth_url
 
@@ -39,13 +39,12 @@ def run():
     auth_url = get_auth_url()
     r = requests.get(auth_url, verify=False)
     print "Status Code: ", r.status_code
-    print "Text: ", r.text
     print "Headers: ", r.headers
     print "URL: ", r.url
 
     token = 123456
-    print "Posting key: %s" % token
-    r2 = requests.post(r.url, data={"username": "admin", "token": token}, verify=False)
+    r2 = requests.post(r.url, data={"username": "admin", "token": token},
+                       verify=False)
     print "Status Code: ", r2.status_code
     print "Text: ", r2.text
     print "Headers: ", r2.headers
