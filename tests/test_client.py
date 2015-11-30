@@ -179,3 +179,49 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
 
     with assert_raises(RuntimeError):
         c.get_user_info("some_token")
+
+
+@patch.object(Messenger, 'send')
+def test_logout(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "ok"
+    params = {"oxd_id": c.oxd_id,
+              "http_based_logout": False}
+    command = {"command": "logout",
+               "params": params}
+
+    # called with no optional params
+    html = c.logout()
+    mock_send.assert_called_with(command)
+
+    # called with OPTIONAL https_based_logout
+    html = c.logout(True)
+    command["params"]["http_based_logout"] = True
+    mock_send.return_value.data.html = "Logout HTML"
+    mock_send.assert_called_with(command)
+    assert_equal(html, "Logout HTML")
+
+    # called with OPTIONAL https_based_logout + id_token
+    html = c.logout(True, "some_id")
+    command["params"]["id_token"] = "some_id"
+    mock_send.assert_called_with(command)
+    assert_equal(html, "Logout HTML")
+
+    # called wiht OPTIONAL https_based_logout + id_token
+    # + post_logout_redirect_uri
+    html = c.logout(False, "some_id", "https://some.site/logout")
+    mock_send.return_value.data = None
+    command["params"]["http_based_logout"] = False
+    command["params"]["post_logout_redirect_uri"] = "https://some.site/logout"
+    mock_send.assert_called_with(command)
+
+
+@patch.object(Messenger, 'send')
+def test_logout_raises_error_when_oxd_return_error(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "error"
+    mock_send.return_value.data.error = "MockError"
+    mock_send.return_value.data.error_description = "Logout Mock Error"
+
+    with assert_raises(RuntimeError):
+        c.logout()
