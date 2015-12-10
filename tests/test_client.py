@@ -185,6 +185,8 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
 def test_logout(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "ok"
+    mock_send.return_value.data.html = "Logout HTML"
+
     params = {"oxd_id": c.oxd_id,
               "http_based_logout": False}
     command = {"command": "logout",
@@ -194,10 +196,9 @@ def test_logout(mock_send):
     html = c.logout()
     mock_send.assert_called_with(command)
 
-    # called with OPTIONAL https_based_logout
+    # called with OPTIONAL http_based_logout
     html = c.logout(True)
     command["params"]["http_based_logout"] = True
-    mock_send.return_value.data.html = "Logout HTML"
     mock_send.assert_called_with(command)
     assert_equal(html, "Logout HTML")
 

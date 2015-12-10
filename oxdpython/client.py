@@ -202,3 +202,40 @@ class Client:
         logger.debug("Recieved reponse: %s", response)
 
         return self.__clear_data(response).claims
+
+    def logout(self, http_logout=False, id_token=None, logout_redirect=None):
+        """Function to logout the user.
+
+        Args:
+            http_logout (boolean) - True if front-channed http based logout
+                                    should be used, defaults to False
+            id_token (string) - OPTIONAL latest id_token obtained from the IP
+                               server
+            logout_redirect (url) - OPTIONAL url for which the server will
+                                    redirect after the user is logged out
+
+        Returns:
+            html (string) - OPTIONAL, returned only if http_logout=true,
+                            returns True (bool) if http_logout=False upon
+                            successful logout
+        """
+        command = {"command": "logout"}
+        params = {"oxd_id": self.oxd_id,
+                  "http_based_logout": http_logout}
+        if id_token:
+            params["id_token"] = id_token
+
+        if logout_redirect:
+            params["post_logout_redirect_uri"] = logout_redirect
+
+        command['params'] = params
+
+        logger.debug("Sending command `logout` with params %s", params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved response: %s", response)
+
+        resp_data = self.__clear_data(response)
+        if http_logout:
+            return resp_data.html
+        else:
+            return True
