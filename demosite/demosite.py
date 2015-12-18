@@ -31,7 +31,6 @@ def authorize():
 
 @app.route('/callback')
 def callabck():
-    print request.url
     if request.args.get('state'):
         state = request.args.get('state')
         code = request.args.get('code')
@@ -43,5 +42,12 @@ def callabck():
 
     return render_template("home.html", user=user)
 
+
+@app.route('/logout')
+def logout():
+    html = oxc.logout(True)
+    html = "Logout successfull Server returned html: %s" % (html,)
+    return render_template("home.html", logout_html=html)
+
 if __name__ == "__main__":
-    app.run(debug=True, port=80)
+    app.run(debug=True, port=8080)

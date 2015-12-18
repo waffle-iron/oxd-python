@@ -135,4 +135,25 @@ def callabck():
 {% endraw %}
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Logging Out</h3>
+        <p>Once the required work is done the user can be logged out of the system. <a class="btn btn-danger" href="/logout">Logout</a></p>
+        {% if logout_html %}
+        <div class="alert alert-success">
+            Logout returned html {{logout_html}}
+        </div>
+        {% endif %}
+    </div>
+   <div class="col-md-6">
+    <pre class="prettyprint lang-python">
+@app.route('/logout')
+def logout():
+    html = oxc.logout(True)  # True indicates we will recieve a HTML response
+    return html
+    </pre>
+    </div>
+</div>
+
 {% endblock content %}
