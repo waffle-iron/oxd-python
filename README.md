@@ -20,7 +20,7 @@ Create a copy of the sample configuration file for your website in a server *wri
 
 The `Client` class of the library provides all the required methods required for the website to communicate with the oxD RP through sockets.
 
-```
+```python
 from oxdpython import Client
 
 config = "/var/www/demosite/demosite.cfg"  # This should be writable by the server
@@ -35,7 +35,7 @@ The website can be registered with the OP using the `client.register_client()` c
 
 The first step is to generate an authorization url which the user can visit to authorize your application to use the information from the OP.
 
-```
+```python
 auth_url = client.get_authorization_url()
 ```
 Using the above url the website can redirect the user for authentication can authorization at the OP.
@@ -44,7 +44,7 @@ Using the above url the website can redirect the user for authentication can aut
 
 The website needs to parse the information fromt the callback url and pass it on to get the access token for fetching user information.
 
-```
+```python
 token = client.get_tokens_by_code(code, scopes, state)
 ```
 The values for code, scope and state are parsed from the callback url querystring. Refer to your web framework to how to get these values from the url.
@@ -53,21 +53,21 @@ The values for code, scope and state are parsed from the callback url querystrin
 
 Claims (information fields) made availble by the OP can be fethed using the access token obtained above.
 
-```
+```python
 user = oxc.get_user_info(token)
 ```
 
 ### Using the claims
 
 The claims can be accessed using the dot notation.
-```
+```python
 print user.username
 print user.inum
 print user.website
 ```
 The availability of varios claims are completely dependent on the OP. Listing the fields of user can give list of all the available claims.
 
-```
+```python
 print user._fields  # to print all the fields
 
 # to check for a particular field and get the information
