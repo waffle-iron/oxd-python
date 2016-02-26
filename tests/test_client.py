@@ -185,35 +185,36 @@ def test_get_user_info_raises_error_on_oxd_error(mock_send):
 def test_logout(mock_send):
     c = Client(config_location)
     mock_send.return_value.status = "ok"
-    mock_send.return_value.data.html = "Logout HTML"
+    mock_send.return_value.data.uri = "https://example.com/end_session"
 
-    params = {"oxd_id": c.oxd_id,
-              "http_based_logout": False}
-    command = {"command": "logout",
+    params = {"oxd_id": c.oxd_id}
+    command = {"command": "get_logout_uri",
                "params": params}
 
     # called with no optional params
-    html = c.logout()
+    uri = c.get_logout_uri()
     mock_send.assert_called_with(command)
 
-    # called with OPTIONAL http_based_logout
-    html = c.logout(True)
-    command["params"]["http_based_logout"] = True
+    # called with OPTIONAL id_token_hint
+    uri = c.get_logout_uri("some_id")
+    command["params"]["id_token_hint"] = "some_id"
     mock_send.assert_called_with(command)
-    assert_equal(html, "Logout HTML")
+    assert_equal(uri, "https://example.com/end_session")
 
-    # called with OPTIONAL https_based_logout + id_token
-    html = c.logout(True, "some_id")
-    command["params"]["id_token"] = "some_id"
-    mock_send.assert_called_with(command)
-    assert_equal(html, "Logout HTML")
-
-    # called wiht OPTIONAL https_based_logout + id_token
-    # + post_logout_redirect_uri
-    html = c.logout(False, "some_id", "https://some.site/logout")
-    mock_send.return_value.data = None
-    command["params"]["http_based_logout"] = False
+    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
+    uri = c.get_logout_uri("some_id", "https://some.site/logout")
     command["params"]["post_logout_redirect_uri"] = "https://some.site/logout"
+    mock_send.assert_called_with(command)
+
+    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri + state
+    uri = c.get_logout_uri("some_id", "https://some.site/logout", "some-s")
+    command["params"]["state"] = "some-s"
+    mock_send.assert_called_with(command)
+
+    # called wiht OPTIONAL id_token_hint + post_logout_redirect_uri
+    uri = c.get_logout_uri("some_id", "https://some.site/logout", "some-s",
+                           "some-ss")
+    command["params"]["session_state"] = "some-ss"
     mock_send.assert_called_with(command)
 
 
@@ -225,4 +226,4 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
     mock_send.return_value.data.error_description = "Logout Mock Error"
 
     with assert_raises(RuntimeError):
-        c.logout()
+        c.get_logout_uri()
