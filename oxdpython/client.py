@@ -233,7 +233,7 @@ class Client:
 
         command["params"] = params
 
-        logger.debug("Sending command `logout` with params %s", params)
+        logger.debug("Sending command `get_logout_uri` with params %s", params)
         response = self.msgr.send(command)
         logger.debug("Recieved response: %s", response)
 

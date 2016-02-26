@@ -45,9 +45,8 @@ def callabck():
 
 @app.route('/logout')
 def logout():
-    html = oxc.logout(True)
-    html = "Logout successfull Server returned html: %s" % (html,)
-    return render_template("home.html", logout_html=html)
+    logout_url = oxc.get_logout_uri()
+    return redirect(logout_url)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

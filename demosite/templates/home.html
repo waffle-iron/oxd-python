@@ -150,8 +150,8 @@ def callabck():
     <pre class="prettyprint lang-python">
 @app.route('/logout')
 def logout():
-    html = oxc.logout(True)  # True indicates we will recieve a HTML response
-    return html
+    logout_url = oxc.get_logout_uri()
+    return redirect(logout_url)
     </pre>
     </div>
 </div>
