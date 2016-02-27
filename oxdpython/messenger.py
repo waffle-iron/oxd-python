@@ -55,9 +55,9 @@ class Messenger:
         Returns:
             response (dict) - The JSON response from the oxD Server as a dict
         """
-        cmd_string = json.dumps(command)
-        msg_length = len(cmd_string)
-        cmd = "{:04d}".format(msg_length) + cmd_string
+        cmd = json.dumps(command)
+        cmd = "{:04d}".format(len(cmd)) + cmd
+        msg_length = len(cmd)
 
         # make the first time connection
         if not self.firstDone:
@@ -67,7 +67,7 @@ class Messenger:
 
         # Send the message the to the server
         totalsent = 0
-        while totalsent < msg_length+4:
+        while totalsent < msg_length:
             try:
                 logger.debug("Sending: %s", cmd[totalsent:])
                 sent = self.sock.send(cmd[totalsent:])
@@ -86,8 +86,7 @@ class Messenger:
             part = self.sock.recv(1024)
             if part == "":
                 logger.error("Socket connection broken, read empty.")
-                logger.debug("Shutting down socket and trying reconnection.")
-                self.sock.shutdown(socket.SHUT_RDWR)
+                logger.error("Closing socket and reconnecting.")
                 self.sock.close()
                 self.__connect()
                 logger.info("Reconnected to socket.")
