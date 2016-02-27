@@ -30,10 +30,11 @@ class Messenger:
             logger.debug("Socket connecting to %s:%s", self.host, self.port)
             self.sock.connect((self.host, self.port))
         except socket.error as e:
-            err = "Unable to connect oxd-server on port {}".format(self.port)
-            logger.critical(err)
             logger.exception("socket error %s", e)
-            raise RuntimeError(err)
+            logger.error("Closing socket and recreating a new one.")
+            self.sock.close()
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((self.host, self.port))
 
     def __json_object_hook(self, d):
         """function to customized the json.loads to return named tuple instead
@@ -86,8 +87,6 @@ class Messenger:
             part = self.sock.recv(1024)
             if part == "":
                 logger.error("Socket connection broken, read empty.")
-                logger.error("Closing socket and reconnecting.")
-                self.sock.close()
                 self.__connect()
                 logger.info("Reconnected to socket.")
 
