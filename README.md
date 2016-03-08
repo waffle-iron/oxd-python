@@ -5,6 +5,8 @@ Python Client Library for the [Gluu oxD Server RP](http://ox.gluu.org/doku.php?i
 
 ## Using the Library in your website
 
+> You are on the `v2.4.2` branch of `oxd-python`. Download the zip of this version only IF you are using `gluu-oxd-server` version 2.4.2. Otherwise switch the branch of matching version as your `gluu-oxd-server` installation and then download the zip.
+
 [oxD RP](http://ox.gluu.org/doku.php?id=oxd:rp) has complete information about the Code Authorization flow and the various details about oxD RP configuration. This document provides only documentation about the oxd-python library.
 
 ### Prerequisites
