@@ -5,6 +5,8 @@ Python Client Library for the [Gluu oxD Server RP](http://ox.gluu.org/doku.php?i
 
 ## Using the Library in your website
 
+> You are now on the `master` branch. If you want to use `oxd-python` for production use, switch to the branch of the matching version as the `oxd-server` you are installing
+
 [oxD RP](http://ox.gluu.org/doku.php?id=oxd:rp) has complete information about the Code Authorization flow and the various details about oxD RP configuration. This document provides only documentation about the oxd-python library.
 
 ### Prerequisites
