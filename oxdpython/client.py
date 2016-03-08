@@ -210,7 +210,8 @@ class Client:
         Args:
             id_token_hint (string) - OPTIONAL (oxd server will use last used
                                      ID Token)
-            post_logout_redirect_uri (string) - OPTIONAL URI for redirection
+            post_logout_redirect_uri (string) - OPTIONAL URI for redirection,
+                this uri would override the value given in the site-config
             state (string) - OPTIONAL site state
             session_state (string) - OPTIONAL session state
         Returns:
@@ -224,6 +225,10 @@ class Client:
 
         if post_logout_redirect_uri:
             params["post_logout_redirect_uri"] = post_logout_redirect_uri
+        elif self.config.get("client", "logout_redirect_uri"):
+            params["post_logout_redirect_uri"] = self.config.get(
+                "client", "logout_redirect_uri"
+                )
 
         if state:
             params["state"] = state
