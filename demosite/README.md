@@ -66,7 +66,7 @@ pip install -r requirements.txt
 cp demosite/demosite.conf /etc/apache2/sites-available/demosite.conf
 chown www-data demosite/demosite.cfg
 a2ensite demosite
-serivce apache2 restart
+service apache2 restart
 ```
 Now the site would be available as the default site for https (port 443) at your domain.
 However the callback urls need to be configured before you can see things working.
