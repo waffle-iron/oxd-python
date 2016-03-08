@@ -39,7 +39,7 @@ def test_send_fail():
     """Messenger.send raises error for non connected port"""
     # should raise error when oxd server is not running
     msgr = Messenger(4000)
-    with assert_raises(RuntimeError):
+    with assert_raises(socket.error):
         msgr.send({'command': 'raise_error'})
 
 
