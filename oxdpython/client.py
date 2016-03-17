@@ -64,10 +64,10 @@ class Client:
         params = {"authorization_redirect_uri":
                   self.authorization_redirect_uri}
         # add other optional params if they exist in config
-        opt_params = ["logout_redirect_uri", "client_jwks_uri",
-                      "client_token_endpoint_auth_method"]
-        opt_list_params = ["acr_values", "redirect_uris", "contacts",
-                           "client_request_uris"]
+        opt_params = ["post_logout_redirect_uri", "client_jwks_uri",
+                      "client_token_endpoint_auth_method", "application_type"]
+        opt_list_params = ["client_logout_uris", "grant_types", "acr_values",
+                           "redirect_uris", "contacts", "client_request_uris"]
         for param in opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
@@ -275,7 +275,7 @@ class Client:
                 params[param] = value
 
         command["params"] = params
-        logger.debug("Sending command `register_site` with params %s",
+        logger.debug("Sending `update_site_registration` with params %s",
                      params)
         response = self.msgr.send(command)
         logger.debug("Recieved reponse: %s", response)
