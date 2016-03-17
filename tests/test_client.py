@@ -1,7 +1,7 @@
 import os
 
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
-    assert_regexp_matches, assert_raises
+    assert_raises
 from mock import patch
 
 from oxdpython import Client
@@ -227,3 +227,23 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
 
     with assert_raises(RuntimeError):
         c.get_logout_uri()
+
+
+@patch.object(Messenger, 'send')
+def test_update_site_registration(mock_send):
+    c = Client(config_location)
+    mock_send.return_value.status = "ok"
+
+    params = {"oxd_id": c.oxd_id,
+              "application_type": c.config.get("client", "application_type"),
+              "authorization_redirect_uri":
+              c.config.get("client", "authorization_redirect_uri"),
+              "redirect_uris": ["https://client.example.com/callback",
+                                "https://client.example.com/callback2"]
+              }
+    command = {"command": "update_site_registration",
+               "params": params}
+
+    status = c.update_site_registration()
+    mock_send.assert_called_with(command)
+    assert_true(status)

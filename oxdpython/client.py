@@ -243,3 +243,44 @@ class Client:
         logger.debug("Recieved response: %s", response)
 
         return self.__clear_data(response).uri
+
+    def update_site_registration(self):
+        """Fucntion to update the site's information with OpenID Provider.
+        This should be called after changing the values in the cfg file.
+
+        Args:
+            None
+
+        Returns:
+            status (boolean) - Update of information was sucessful or not
+        """
+        command = {"command": "update_site_registration"}
+        params = {"oxd_id": self.oxd_id,
+                  "authorization_redirect_uri": self.authorization_redirect_uri
+                  }
+        optional_params = ["post_logout_redirect_uri", "application_type",
+                           "client_jwks_uri",
+                           "client_token_endpoint_auth_method"]
+        optional_list_params = ["client_logout_uris", "grant_types",
+                                "redirect_uris", "acr_values",
+                                "client_reqeust_uris", "contacts"]
+        for param in optional_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param)
+                params[param] = value
+
+        for param in optional_list_params:
+            if self.config.get("client", param):
+                value = self.config.get("client", param).split(",")
+                params[param] = value
+
+        command["params"] = params
+        logger.debug("Sending command `register_site` with params %s",
+                     params)
+        response = self.msgr.send(command)
+        logger.debug("Recieved reponse: %s", response)
+
+        if response.status == "ok":
+            return True
+        else:
+            return False
