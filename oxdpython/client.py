@@ -16,7 +16,7 @@ class Client:
     def __init__(self, config_location):
         """Constructor of class Client
         Args:
-            config_location (string) - The complete path of the location of
+            config_location (string): The complete path of the location of
                 the config file which is a modified conpy of the sample.cfg
                 from this library
         """
@@ -48,11 +48,8 @@ class Client:
     def register_site(self):
         """Function to register the site and generate a unique ID for the site
 
-        Args:
-            None
-
         Returns:
-            status (boolean) - Registration of site was successful or not
+            The status (boolean) of the registration of site
         """
         if self.oxd_id:
             logger.info('Client is already registered. ID: %s', self.oxd_id)
@@ -94,12 +91,12 @@ class Client:
         browser for the user to provide authorization and authentication
 
         Args:
-            acr_values (list) - OPTIONAL list of acr values in the order of
+            acr_values (list): OPTIONAL list of acr values in the order of
                                 priority
 
         Returns:
-            auth_url (string) - the authorization url that the user must access
-                                for authentication and authorization
+            The authorization url (string) that the user must access for
+            authentication and authorization
         """
         command = {"command": "get_authorization_url"}
         if not self.oxd_id:
@@ -123,13 +120,13 @@ class Client:
         OP. It is called after the user authorizies by visiting the auth URL.
 
         Args:
-            code (string) - code obtained from the auth url callback
-            scopes (list) - scopes authorized by the OP, fromt he url callback
-            state (string) - state key obtained from the auth url callback
+            code (string): code obtained from the auth url callback
+            scopes (list): scopes authorized by the OP, fromt he url callback
+            state (string): state key obtained from the auth url callback
 
         Returns:
-            access_token (string) - the access token which should be passed to
-                                    get the user information from the OP
+            The access token (string) which should be passed to get the user
+            information from the OP
         """
         if not (code and scopes) or type(scopes) != list:
             err_msg = """Empty/Wrong value in place of code or scope.
@@ -159,13 +156,13 @@ class Client:
         OP. It is called after the user authorizies by visiting the auth URL.
 
         Args:
-            url (string) - the callback url which was called by the OP after
+            url (string): the callback url which was called by the OP after
                            user authorization which has the states, code and
                            scopes as query parameters
 
         Returns:
-            access_token (string) - the access token which should be passed to
-                                    get the user information from the OP
+            The access token (string) which should be passed to get the user
+            information from the OP
         """
         command = {"command": "get_tokens_by_code"}
         params = {"oxd_id": self.oxd_id, "url": url}
@@ -182,11 +179,11 @@ class Client:
         obtained from the OP
 
         Args:
-            access_token (string) - access token from the get_tokens_by_code
+            access_token (string): access token from the get_tokens_by_code
                                     function
 
         Returns:
-            claims (object) - the user data claims that are returned by the OP
+            The user data claims (named tuple) that are returned by the OP
         """
         if not access_token:
             logger.error("Empty access code sent for get_user_info")
@@ -208,15 +205,16 @@ class Client:
         """Function to logout the user.
 
         Args:
-            id_token_hint (string) - OPTIONAL (oxd server will use last used
-                                     ID Token)
-            post_logout_redirect_uri (string) - OPTIONAL URI for redirection,
+            id_token_hint (string): OPTIONAL (oxd server will use last used
+                ID Token)
+            post_logout_redirect_uri (string): OPTIONAL URI for redirection,
                 this uri would override the value given in the site-config
-            state (string) - OPTIONAL site state
-            session_state (string) - OPTIONAL session state
+            state (string): OPTIONAL site state
+            session_state (string): OPTIONAL session state
+
         Returns:
-            uri (string) - the URI to which the user must be directed in
-                           order to perform the logout
+            The URI (string) to which the user must be directed in order to
+            perform the logout
         """
         command = {"command": "get_logout_uri"}
         params = {"oxd_id": self.oxd_id}
@@ -248,11 +246,8 @@ class Client:
         """Fucntion to update the site's information with OpenID Provider.
         This should be called after changing the values in the cfg file.
 
-        Args:
-            None
-
         Returns:
-            status (boolean) - Update of information was sucessful or not
+            The status (boolean) for update of information was sucessful or not
         """
         command = {"command": "update_site_registration"}
         params = {"oxd_id": self.oxd_id,
