@@ -1,7 +1,7 @@
 import os
 
 from nose.tools import assert_equal, assert_is_instance, assert_true,\
-    assert_raises, assert_is_none, assert_is_not_none
+    assert_raises, assert_is_none, assert_is_not_none, assert_in
 from mock import patch
 
 from oxdpython import Client
@@ -29,56 +29,32 @@ def test_register_site_command():
     c.register_site()
     assert_is_not_none(c.oxd_id)
 
-"""
-@patch.object(Messenger, 'send')
-def test_register_raises_runtime_error_for_oxd_error_response(mock_send):
-    mock_send.return_value.status = "error"
-    mock_send.return_value.data.error = "MockError"
-    mock_send.return_value.data.error_description = "MockError created to test"
+
+def test_register_raises_runtime_error_for_oxd_error_response():
     config = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
     c = Client(config)
     with assert_raises(RuntimeError):
         c.register_site()
 
 
-@patch.object(Messenger, 'send')
-def test_get_authorization_url(mock_send):
+def test_get_authorization_url():
     c = Client(config_location)
-    mock_send.return_value.status = "ok"
-    mock_send.return_value.data.authorization_url = "mock_url"
-    command = {"command": "get_authorization_url",
-               "params": {
-                   "oxd_id": c.oxd_id
-                   }}
     auth_url = c.get_authorization_url()
-    mock_send.assert_called_with(command)
-    assert_equal(auth_url, "mock_url")
+    assert_in('client_secret', auth_url)
 
 
-@patch.object(Client, 'register_site')
-@patch.object(Messenger, 'send')
-def test_get_authorization_url_calls_register_if_no_oxdid(mock_send, mock_register):
-    config_loc = os.path.join(this_dir, 'data', 'no_oxdid.cfg')
-    c = Client(config_loc)
-    mock_send.return_value.status = "ok"
-    mock_send.return_value.data.authorization_url = "mock_url"
-    c.get_authorization_url()
-    mock_register.assert_called_with()
-
-
-@patch.object(Messenger, 'send')
-def test_get_auth_url_accepts_acr_as_optional_params(mock_send):
+def test_get_authorization_url_works_wihtout_explicit_site_registration():
     c = Client(config_location)
-    mock_send.return_value.status = "ok"
-    mock_send.return_value.data.authorization_url = "mock_url"
-    command = {"command": "get_authorization_url",
-               "params": {
-                   "oxd_id": c.oxd_id,
-                   "acr_values": ["basic", "gplus"]
-                   }}
+    c.oxd_id = None  # assume the client isn't registered
+    auth_url = c.get_authorization_url()
+    assert_in('client_secret', auth_url)
+
+
+def test_get_auth_url_accepts_acrvalues_as_optional_params():
+    c = Client(config_location)
     auth_url = c.get_authorization_url(["basic", "gplus"])
-    mock_send.assert_called_with(command)
-    assert_equal(auth_url, "mock_url")
+    assert_in('basic', auth_url)
+    assert_in('gplus', auth_url)
 
 
 @patch.object(Messenger, 'send')
@@ -226,22 +202,7 @@ def test_logout_raises_error_when_oxd_return_error(mock_send):
         c.get_logout_uri()
 
 
-@patch.object(Messenger, 'send')
-def test_update_site_registration(mock_send):
+def test_update_site_registration():
     c = Client(config_location)
-    mock_send.return_value.status = "ok"
-
-    params = {"oxd_id": c.oxd_id,
-              "application_type": c.config.get("client", "application_type"),
-              "authorization_redirect_uri":
-              c.config.get("client", "authorization_redirect_uri"),
-              "redirect_uris": ["https://client.example.com/callback",
-                                "https://client.example.com/callback2"]
-              }
-    command = {"command": "update_site_registration",
-               "params": params}
-
     status = c.update_site_registration()
-    mock_send.assert_called_with(command)
     assert_true(status)
-"""
