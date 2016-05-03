@@ -61,10 +61,16 @@ class Client:
         params = {"authorization_redirect_uri":
                   self.authorization_redirect_uri}
         # add other optional params if they exist in config
-        opt_params = ["post_logout_redirect_uri", "client_jwks_uri",
-                      "client_token_endpoint_auth_method", "application_type"]
-        opt_list_params = ["client_logout_uris", "grant_types", "acr_values",
-                           "redirect_uris", "contacts", "client_request_uris"]
+        opt_params = ["post_logout_redirect_uri",
+                      "client_jwks_uri",
+                      "client_token_endpoint_auth_method",
+                      "application_type"]
+        opt_list_params = ["grant_types",
+                           "acr_values",
+                           "redirect_uris",
+                           "contacts",
+                           "client_logout_uris",
+                           "client_request_uris"]
         for param in opt_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
