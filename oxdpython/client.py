@@ -264,7 +264,7 @@ class Client:
                            "client_token_endpoint_auth_method"]
         optional_list_params = ["client_logout_uris", "grant_types",
                                 "redirect_uris", "acr_values",
-                                "client_reqeust_uris", "contacts"]
+                                "client_request_uris", "contacts"]
         for param in optional_params:
             if self.config.get("client", param):
                 value = self.config.get("client", param)
