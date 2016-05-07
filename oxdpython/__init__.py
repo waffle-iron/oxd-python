@@ -1,6 +1,6 @@
 # module metadata
 __description__ = "A Python Client for oxD Server"
-__version__ = "2.4.3"
+__version__ = "master"
 __author__ = "Gluu"
 
 # setup logging system
