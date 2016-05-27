@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/GluuFederation/oxd-python.png?label=ready&title=Ready)](https://waffle.io/GluuFederation/oxd-python)
 # oxd-python
 Python Client Library for the [Gluu oxD Server RP](http://ox.gluu.org/doku.php?id=oxd:rp).
 
